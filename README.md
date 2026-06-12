@@ -28,6 +28,8 @@ The final solution combines classical time series decomposition with unsupervise
 
 Final submission uses Logistic Regression with tuned hyperparameters (C=0.01, L2 penalty, balanced class weights), evaluated via 5-fold cross-validation.
 
+![ROC Curve](reports/figures/roc_curve.png)
+
 ---
 
 ## Pipeline
