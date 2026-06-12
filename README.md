@@ -1,204 +1,146 @@
-# Rainfall Prediction — Model Development Journey
+# 🌧️ Rainfall — Two-Year Rainfall Probability Forecast
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue) ![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-orange) ![XGBoost](https://img.shields.io/badge/XGBoost-boosting-green) ![Kaggle](https://img.shields.io/badge/Kaggle-competition-red)
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-orange)
+![XGBoost](https://img.shields.io/badge/XGBoost-boosting-green)
+![statsmodels](https://img.shields.io/badge/statsmodels-time%20series-lightgrey)
+![Kaggle](https://img.shields.io/badge/Kaggle-Competition-blue)
 
-> 🏆 **First Kaggle competition entry** — Complete iterative development from baseline to hybrid model with **ROC-AUC 0.894**
+> Predicting daily rainfall probability up to **730 days** into the future using a hybrid time series + clustering pipeline — built for my first Kaggle competition.
+
+---
 
 ## Overview
 
-This repository documents the full development journey of a rainfall prediction model built for a Kaggle competition. Starting from a simple K-Means baseline, the model evolved into a sophisticated hybrid approach combining time series decomposition, clustering, and ensemble methods.
+This project tackles the challenge of long-horizon binary weather forecasting: given 7 years of historical meteorological data (2013–2019), predict whether it will rain on each day across the following two years (2020–2021).
 
-**Goal:** Predict daily rainfall probability up to two years in advance (730 days), trained on 7 years of historical meteorological data (2013–2019).
-
----
-
-## 🎯 Key Results
-
-| Metric | Score |
-|--------|-------|
-| **ROC-AUC (Validation)** | **0.894** |
-| **Model Type** | Hybrid (Time Series + Clustering) |
-| **Training Data** | 2,556 days (2013–2019) |
-| **Test Horizon** | 730 days (2020–2021) |
-| **Features Engineered** | 15+ (lag, trend, seasonality, clustering) |
+The final solution combines classical time series decomposition with unsupervised clustering and dimensionality reduction to extract rich temporal and structural features, ultimately evaluated using cross-validated ROC-AUC.
 
 ---
 
-## 📊 Development Timeline
+## Results
 
-| Date | Notebook | What was added |
-|------|----------|----------------|
-| 08 Sep | Rain_k-mean | Baseline — KMeans clustering, MinMaxScaler, XGBoost |
-| 09 Sep | Rain_k-mean_2 / Rain_PCA | Added PCA dimensionality reduction |
-| 10 Sep | Rain / Rain_k-mean_PCA | Combined KMeans + PCA pipeline |
-| 11 Sep | Rain_PCA | PCA variance analysis, loadings, mutual information scores |
-| 13 Sep | Rain_k-mean_PCA_2 | Refined PCA + KMeans feature engineering |
-| 14 Sep | Rain_2dts_k-mean_PCA | Introduced second dataset, extended feature set |
-| 19 Sep | Time_series / Time_series_time_lag | Switched to time series approach, added lag features |
-| 22 Sep | Time_series_time_lag_2clstrs_trend | Added trend modelling, DeterministicProcess, Fourier seasonality, 2 clusters |
-| 25 Sep | **Rain_2dts_k-mean_PCA_2** (⭐ BEST) | Hyperparameter tuning, hybrid model combining clustering + time series |
+| Model | CV ROC-AUC |
+|-------|-----------|
+| RandomForest (baseline) | 0.878 |
+| LogisticRegression | 0.894 |
+| LogisticRegression + GridSearch (C=0.01, L2) | **0.894** |
+
+Final submission uses Logistic Regression with tuned hyperparameters (C=0.01, L2 penalty, balanced class weights), evaluated via 5-fold cross-validation.
 
 ---
 
-## 🔧 Final Pipeline (Rain_2dts_k-mean_PCA_2.ipynb)
-
-The best model combines multiple techniques:
-
-1. **Trend & Seasonality Decomposition**
-   - DeterministicProcess with annual Fourier terms (CalendarFourier)
-   - Removes deterministic patterns from the target
-
-2. **Deseasonalization**
-   - LinearRegression fit subtracted from target
-   - Focuses model on residual variance
-
-3. **Frequency Analysis**
-   - Periodogram analysis to verify seasonality removal
-   - Identifies dominant frequencies in data
-
-4. **Feature Engineering**
-   - Mutual information ranking for feature selection
-   - Lag features (t-1, t-7, t-30, etc.)
-   - Time index features
-   - Meteorological feature aggregation (2 datasets combined)
-
-5. **Clustering**
-   - KMeans (k=2, elbow method)
-   - Centroid distance features capture weather regime shifts
-
-6. **Dimensionality Reduction**
-   - PCA on meteorological features
-   - Reduces noise, improves generalization
-
-7. **Final Model**
-   - LogisticRegression baseline with ROC-AUC evaluation
-   - Cross-validation to prevent overfitting
-
----
-
-## 💾 Tech Stack
-
-- **Python** 3.10+
-- **Data Processing:** Pandas, NumPy, SciPy
-- **Machine Learning:** scikit-learn (KMeans, PCA, LogisticRegression)
-- **Boosting:** XGBoost
-- **Time Series:** statsmodels (DeterministicProcess, CalendarFourier)
-- **Visualization:** Matplotlib, Seaborn
-- **Notebooks:** Jupyter
-
----
-
-## 📈 Dataset
-
-**Source:** Kaggle meteorological competition data
-
-| Split | Duration | Days |
-|-------|----------|------|
-| **Train** | 2013–2019 | 2,556 |
-| **Test** | 2020–2021 | 730 |
-
-**Features:**
-- `cloud` — Cloud coverage
-- `sunshine` — Sunshine hours
-- `humidity` — Relative humidity
-- `temperature` — Daily temperature
-- `dewpoint` — Dew point
-- `winddirection` — Wind direction
-
----
-
-## 🚀 How to Run
-
-### Prerequisites
-- Python 3.10 or higher
-- pip or conda
-
-### Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/zikmundmartin7-lab/rainfall.git
-   cd rainfall
-   ```
-
-2. **Create virtual environment (optional but recommended)**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Start Jupyter and run the best notebook**
-   ```bash
-   jupyter notebook Rain_2dts_k-mean_PCA_2.ipynb
-   ```
-
----
-
-## 📁 Project Structure
+## Pipeline
 
 ```
-rainfall/
-├── README.md                          # This file
-├── requirements.txt                   # Python dependencies
-├── LICENSE                           # MIT License
-├── .gitignore                        # Git ignore file
-│
-├── notebooks/                        # Jupyter notebooks
-│   ├── Rain_k-mean.ipynb            # Baseline
-│   ├── Rain_k-mean_2.ipynb
-│   ├── Rain_PCA.ipynb
-│   ├── Rain_k-mean_PCA.ipynb
-│   ├── Rain_k-mean_PCA_2.ipynb
-│   ├── Rain_2dts_k-mean_PCA.ipynb
-│   ├── Time_series.ipynb
-│   ├── Time_series_time_lag.ipynb
-│   ├── Time_series_time_lag_2clstrs_trend.ipynb
-│   └── Rain_2dts_k-mean_PCA_2.ipynb  # ⭐ START HERE
-│
-└── data/                             # Data files (if included)
-    └── (meteorological data)
+Raw meteorological data
+        │
+        ▼
+Trend & Seasonality Modelling     ← DeterministicProcess + CalendarFourier (annual)
+        │
+        ▼
+Deseasonalization                 ← LinearRegression fit subtracted from target
+        │
+        ▼
+Periodogram Analysis              ← Frequency spectrum verification
+        │
+        ▼
+Feature Engineering               ← Mutual information ranking, lag features, time index
+        │
+        ▼
+Clustering                        ← KMeans (k=2, elbow method) + centroid distances
+        │
+        ▼
+Dimensionality Reduction          ← PCA on meteorological features
+        │
+        ▼
+Classification & Evaluation       ← XGBoost / LogisticRegression, cross-validated ROC-AUC
 ```
 
 ---
 
-## 🎓 Skills Demonstrated
+## Dataset
 
-- ✅ **Time Series Analysis** — Trend/seasonality decomposition, Fourier features
-- ✅ **Feature Engineering** — Lag features, mutual information selection, clustering features
-- ✅ **Dimensionality Reduction** — PCA for noise reduction
-- ✅ **Clustering** — KMeans with elbow method, centroid distance features
-- ✅ **Model Evaluation** — ROC-AUC, cross-validation, hyperparameter tuning
-- ✅ **Ensemble Methods** — Hybrid model combining multiple techniques
-- ✅ **Data Visualization** — Periodograms, variance analysis, trend plots
-- ✅ **Kaggle Competition Experience** — Real-world ML pipeline development
+| Split | Period | Days |
+|-------|--------|------|
+| Train | 2013–2019 | 2,556 |
+| Test | 2020–2021 | 730 |
 
----
+**Features:** `cloud` · `sunshine` · `humidity` · `temperature` · `dewpoint` · `winddirection`
 
-## 📝 Author
-
-**Martin Zikmund**
-
-- 📧 Email: zikmundmartin7@gmail.com
-- 💼 LinkedIn: [martin-zikmund-b0aa35122](https://www.linkedin.com/in/martin-zikmund-b0aa35122)
-- 🐙 GitHub: [@zikmundmartin7-lab](https://github.com/zikmundmartin7-lab)
+Source: [Kaggle — Rainfall Prediction](https://www.kaggle.com/)
 
 ---
 
-## 📄 License
+## Tech Stack
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+| Category | Libraries |
+|----------|-----------|
+| ML & Preprocessing | scikit-learn (KMeans, PCA, RandomForestRegressor, LogisticRegression), XGBoost |
+| Time Series | statsmodels (DeterministicProcess, CalendarFourier) |
+| Data | Pandas, NumPy, SciPy |
+| Visualisation | Matplotlib, Seaborn |
+| Environment | Jupyter Notebook |
 
 ---
 
-## 🤝 Contributing
+## Repository Structure
 
-Feedback, issues, and pull requests are welcome!
+```
+Rainfall/
+├── data/
+│   ├── train.csv                  # Primary training set (2013–2019)
+│   ├── train2_0.csv               # Extended training set (version 0)
+│   ├── train2_1.csv               # Extended training set (version 1)
+│   ├── test.csv                   # Test set (2020–2021)
+│   ├── sample_submission.csv      # Kaggle submission template
+│   └── Rainfall.csv               # Full combined dataset
+├── notebooks/
+│   ├── 01_eda.ipynb               # Exploratory data analysis
+│   ├── 02_pca.ipynb               # PCA dimensionality reduction
+│   ├── 03_clustering.ipynb        # KMeans clustering
+│   ├── 04_feature_engineering.ipynb  # Lag features, Fourier terms, mutual information
+│   ├── 05_final_model.ipynb       # Final hybrid model
+│   └── archive/                   # Earlier experimental notebooks
+│       ├── 01_kmeans_pca.ipynb
+│       ├── 02_pca_analysis.ipynb
+│       ├── 03_kmeans_pca_v2.ipynb
+│       ├── 04_two_datasets_kmeans_pca.ipynb
+│       ├── 05_timeseries_lag.ipynb
+│       ├── 06_timeseries_baseline.ipynb
+│       ├── 07_timeseries_2clusters_trend.ipynb
+│       ├── 08_timeseries_2clusters.ipynb
+│       ├── 09_kmeans_pca_hyperparams.ipynb
+│       └── 10_timeseries_hybrid.ipynb
+├── reports/
+│   └── figures/                   # Generated plots and visualisations
+├── requirements.txt
+├── LICENSE
+└── README.md
+```
 
 ---
 
-**Last Updated:** June 2026
+## Getting Started
+
+```bash
+git clone https://github.com/zikmundmartin7-lab/Rainfall.git
+cd Rainfall
+pip install scikit-learn xgboost statsmodels pandas numpy scipy matplotlib seaborn
+```
+
+Open the final notebook:
+
+```bash
+jupyter notebook notebooks/05_final_model.ipynb
+```
+
+---
+
+## Author
+
+**Martin Zikmund** — [zikmundmartin7@gmail.com](mailto:zikmundmartin7@gmail.com)
+
+---
+
+*First Kaggle competition entry. Built iteratively over ~3 weeks in September 2025.*
