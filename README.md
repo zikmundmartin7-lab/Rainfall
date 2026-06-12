@@ -30,6 +30,20 @@ Final submission uses Logistic Regression with tuned hyperparameters (C=0.01, L2
 
 ![ROC Curve](reports/figures/roc_curve.png)
 
+![Confusion Matrix](reports/figures/confusion_matrix.png)
+
+---
+
+## Visualisations
+
+![Feature Importance](reports/figures/Feature_Importance.png)
+
+![PCA Explained Variance](reports/figures/PCA_variance_explained.png)
+
+![KMeans Elbow Chart](reports/figures/KMeans_elbow_chart.png)
+
+![Correlation Heatmap](reports/figures/Correlation_Heatmap.png)
+
 ---
 
 ## Pipeline
@@ -115,8 +129,13 @@ Rainfall/
 │       ├── 09_kmeans_pca_hyperparams.ipynb
 │       └── 10_timeseries_hybrid.ipynb
 ├── reports/
-│   └── figures/                   # Generated plots and visualisations
-├── requirements.txt
+│   └── figures/
+│       ├── roc_curve.png
+│       ├── confusion_matrix.png
+│       ├── Feature_Importance.png
+│       ├── PCA_variance_explained.png
+│       ├── KMeans_elbow_chart.png
+│       └── Correlation_Heatmap.png├── requirements.txt
 ├── LICENSE
 └── README.md
 ```
